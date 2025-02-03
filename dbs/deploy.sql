@@ -42,7 +42,7 @@ CREATE SERVICE IDENTIFIER($SVC)
 
 SHOW SERVICES;
 
--- wait for endpoints to be provisioned
+-- wait for service provisioning to complete
 CALL SYSTEM$WAIT(1, 'MINUTES');
 
 -- check the status of service
