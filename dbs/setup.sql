@@ -1,0 +1,95 @@
+SET DBS = '<% dbsname %>';
+SET XMA = '<% depname %>';
+SET SVC = '<% depname %>_SVC';
+SET USR = '<% depname %>_USR';
+SET ROL = '<% depname %>_ROL';
+SET CPL = '<% depname %>_CPL';
+SET VWH = '<% depname %>_VWH';
+SET NRL = '<% depname %>_NRL';
+SET EAI = '<% depname %>_EAI';
+SET HUB = '<% hubname %>.servicebus.windows.net:9093';
+
+
+---------------------------------------------------------------------------------
+USE ROLE ACCOUNTADMIN;
+
+CREATE OR REPLACE ROLE IDENTIFIER($ROL);
+
+GRANT BIND SERVICE ENDPOINT ON ACCOUNT TO ROLE IDENTIFIER($ROL);
+GRANT ROLE IDENTIFIER($ROL) TO ROLE SYSADMIN;
+
+CREATE OR REPLACE USER IDENTIFIER($USR)
+    TYPE = SERVICE
+    DEFAULT_ROLE = $ROL
+;--RSA_PUBLIC_KEY = '';
+
+GRANT ROLE IDENTIFIER($ROL) TO USER IDENTIFIER($USR);
+GRANT ROLE IDENTIFIER($ROL) TO ROLE SYSADMIN;
+
+
+---------------------------------------------------------------------------------
+USE ROLE SYSADMIN;
+USE SECONDARY ROLES IDENTIFIER($ROL);
+
+CREATE DATABASE IF NOT EXISTS IDENTIFIER($DBS);
+GRANT USAGE ON DATABASE IDENTIFIER($DBS) TO ROLE IDENTIFIER($ROL);
+GRANT CREATE SCHEMA ON DATABASE IDENTIFIER($DBS) TO ROLE IDENTIFIER($ROL);
+
+CREATE WAREHOUSE IF NOT EXISTS IDENTIFIER($VWH)
+  WAREHOUSE_SIZE = 'small'
+  WAREHOUSE_TYPE = 'standard'
+  AUTO_SUSPEND = 60
+  AUTO_RESUME = TRUE
+  INITIALLY_SUSPENDED = TRUE;
+GRANT ALL PRIVILEGES ON WAREHOUSE IDENTIFIER($VWH) TO ROLE IDENTIFIER($ROL);
+GRANT OWNERSHIP ON WAREHOUSE IDENTIFIER($VWH) TO ROLE IDENTIFIER($ROL) REVOKE CURRENT GRANTS;
+
+CREATE COMPUTE POOL IF NOT EXISTS IDENTIFIER($CPL)
+    MIN_NODES = 1
+    MAX_NODES = 1
+    AUTO_RESUME = TRUE
+    AUTO_SUSPEND_SECS = 300
+    INSTANCE_FAMILY = CPU_X64_S;
+GRANT ALL PRIVILEGES ON COMPUTE POOL IDENTIFIER($CPL) TO ROLE IDENTIFIER($ROL);
+GRANT OWNERSHIP ON COMPUTE POOL IDENTIFIER($CPL) TO ROLE IDENTIFIER($ROL) REVOKE CURRENT GRANTS;
+
+
+
+---------------------------------------------------------------------------------
+USE ROLE ACCOUNTADMIN;
+USE DATABASE IDENTIFIER($DBS);
+
+CREATE NETWORK RULE IF NOT EXISTS IDENTIFIER($NRL)
+  TYPE = 'HOST_PORT'
+  MODE = 'EGRESS'
+  VALUE_LIST = ('0.0.0.0:443', '0.0.0.0:80', $HUB);
+
+CREATE EXTERNAL ACCESS INTEGRATION IF NOT EXISTS IDENTIFIER($EAI)
+  ALLOWED_NETWORK_RULES = ($NRL)
+  ENABLED = TRUE;
+
+GRANT USAGE ON INTEGRATION IDENTIFIER($EAI) TO ROLE IDENTIFIER($ROL);
+
+
+
+---------------------------------------------------------------------------------
+USE ROLE IDENTIFIER($ROL);
+USE DATABASE IDENTIFIER($DBS);
+
+CREATE SCHEMA IF NOT EXISTS IDENTIFIER($XMA) WITH MANAGED ACCESS;
+USE SCHEMA IDENTIFIER($XMA);
+
+-- this is for container service specifications (yaml). We can also supply it directly in sql statement
+CREATE STAGE IF NOT EXISTS SPECS
+    ENCRYPTION = (TYPE='SNOWFLAKE_SSE')
+    DIRECTORY = (ENABLE = TRUE);
+
+-- this volume is mounted on a container in case something requires longtime storage that survives the restarts.
+-- We store the app code there so when changes are needed you don't have to rebuild the whole container and just
+-- can upload the app tar and recreate the service from sql
+CREATE STAGE IF NOT EXISTS VOLUMES
+    ENCRYPTION = (TYPE='SNOWFLAKE_SSE') 
+    DIRECTORY = (ENABLE = TRUE);
+
+-- this is repo for docker image of the app
+CREATE IMAGE REPOSITORY IF NOT EXISTS IMAGES;
