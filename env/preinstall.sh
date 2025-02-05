@@ -37,4 +37,3 @@ sudo dpkg -i snowflake-cli-3.3.0.x86_64.deb
 
 mkdir $HOME/Snowflake
 cd $HOME/Snowflake
-git clone https://github.com/mykovalenko/sfc_spcs_sps_eventhub
