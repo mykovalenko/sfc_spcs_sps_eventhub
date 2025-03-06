@@ -12,10 +12,10 @@ read -p "Give a name for your deployment [${APPNAME}]: " DEPNAME
 DEPNAME=${DEPNAME:-${APPNAME}}
 
 read -p "Provide target Snowflake ORG name [ORG]: " ORGNAME
-ORGNAME=$(echo "${ORGNAME:-'ORG'}" | tr '[:lower:]' '[:upper:]')
+ORGNAME=$(echo "${ORGNAME:-'ORG'}" | tr '[:upper:]' '[:lower:]')
 
 read -p "Provide target Snowflake ACC alias [ACC]: " ACCALIAS
-ACCALIAS=$(echo "${ACCALIAS:-'ACC'}" | tr '[:lower:]' '[:upper:]')
+ACCALIAS=$(echo "${ACCALIAS:-'ACC'}" | tr '[:upper:]' '[:lower:]')
 
 read -p "Provide EventHub namespace (without [.servicebus.windows.net]): " HUBNAME
 HUBNAME=$(echo "${HUBNAME:-'missing'}" | tr '[:upper:]' '[:lower:]')
@@ -24,7 +24,7 @@ read -p "Provide source topic name (Event Hub): " TOPNAME
 TOPNAME=$(echo "${TOPNAME:-'missing'}" | tr '[:upper:]' '[:lower:]')
 
 read -p "Provide SAS Key Name [RootManageSharedAccessKey]: " KEYNAME
-KEYNAME=$(echo "${KEYNAME:-'RootManageSharedAccessKey'}")
+KEYNAME=$(echo "${KEYNAME:-RootManageSharedAccessKey}")
 
 read -p "Provide SAS Key: " KEYPASS
 KEYPASS=$(echo "${KEYPASS:-'missing'}")

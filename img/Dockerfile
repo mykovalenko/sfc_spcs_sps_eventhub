@@ -3,11 +3,12 @@ ENV CONNECT_PLUGIN_PATH="/usr/share/confluent-hub-components"
 
 # install snowflake kafka connector
 RUN confluent-hub install --no-prompt snowflakeinc/snowflake-kafka-connector:latest
+#RUN confluent-hub install --no-prompt confluentinc/kafka-connect-azure-event-hubs:latest
 
 # main script
 WORKDIR /opt/spcs
-COPY ./startup.sh /opt/spcs/
+COPY ./main.sh /opt/spcs/
 
-# startup script
-CMD ["chmod +x /opt/spcs/startup.sh"]
-ENTRYPOINT ["/opt/spcs/startup.sh"]
+# main script
+CMD ["chmod +x /opt/spcs/main.sh"]
+ENTRYPOINT ["/opt/spcs/main.sh"]

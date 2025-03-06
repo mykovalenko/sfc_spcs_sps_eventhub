@@ -3,9 +3,9 @@
 sudo apt update
 sudo apt upgrade
 
+#sudo apt install make
 #sudo apt install net-tools
 #sudo apt install ssh
-#sudo apt install make
 #sudo systemctl enable ssh
 
 # Remove potentially pre-installed packages:
