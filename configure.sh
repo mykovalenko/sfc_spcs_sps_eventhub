@@ -93,8 +93,8 @@ sed -i "s|&{ tblname }|${TBLNAME}|g" ${BASEDIR}/img/snowflake.properties
 sed -i "s|&{ accname }|${ORGNAME}-${ACCALIAS}|g" ${BASEDIR}/img/snowflake.properties
 sed -i "s|&{ dbsname }|${DBSNAME}|g" ${BASEDIR}/img/snowflake.properties
 sed -i "s|&{ xmaname }|${DEPNAME}|g" ${BASEDIR}/img/snowflake.properties
-sed -i "s|&{ svcrole }|${DEPNAME}_ROL|g" ${BASEDIR}/img/snowflake.properties
-sed -i "s|&{ svcuser }|${DEPNAME}_USR|g" ${BASEDIR}/img/snowflake.properties
+sed -i "s|&{ svcrole }|APP_${DEPNAME}_OWNER|g" ${BASEDIR}/img/snowflake.properties
+sed -i "s|&{ svcuser }|APP_${DEPNAME}_USER|g" ${BASEDIR}/img/snowflake.properties
 sed -i "s|&{ keypair }|${p8}|g" ${BASEDIR}/img/snowflake.properties
 
 # Create SETUP MASTER USER connection entry for snow cli
